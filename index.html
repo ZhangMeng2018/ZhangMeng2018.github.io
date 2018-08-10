@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{
+            margin: 0;
+            padding:0;
+        }
+        li{
+            width: 120px;
+        }
+    </style>
+    <script src="js/jquery-3.2.1.js"></script>
+</head>
+<body>
+
+        <div id="con">
+            <div id="imgCon"></div>
+            <ul></ul>
+        </div>
+        <script>
+            const WIDTH=1200;
+            const HEIGHT=400;
+            var imgArr=["img/a.jpeg","img/b.jpeg","img/c.jpeg","img/d.jpeg","img/e.jpeg"];
+            var imgArr1=["img/1.jpeg","img/2.jpeg","img/3.jpeg","img/4.jpeg","img/5.jpeg"];
+            var left;
+            var right;
+            var con=$("#con");
+            var imgCon=$("#imgCon");
+            var uls=$("ul");
+            var position=0;
+            var dic="";
+            var bool=false;
+            var auto=true;
+            var preLi;
+            var time=250;
+
+            loadImg();
+            setInterval(animation,16);
+
+            function loadImg() {
+                left=$("<img>").on("load",loadHandler).attr("src","img/left.png").on("click",leftClickHandler);
+            }
+
+            function loadHandler() {
+                $(this).off("load",loadHandler).appendTo(con);
+                if (this===left[0]){
+                    right=$("<img>").on("load",loadHandler).attr("src","img/right.png").on("click",rightClickHandler);
+                }else {
+                    init();
+                }
+            }
+
+
+            function init() {
+                left.css({
+                    left:"5px",
+                    top:(HEIGHT-left.height())/2+"px",
+                    position: "absolute"
+                });
+                right.css({
+                    right:"5px",
+                    top:(HEIGHT-left.height())/2+"px",
+                    position: "absolute"
+                });
+                con.css({
+                    width:WIDTH+"px",
+                    height:HEIGHT+"px",
+                    position:"relative",
+                    margin:"auto",
+                    overflow:"hidden"
+                });
+                imgCon.css("position","absolute");
+                var img=$("<img>").attr("src",imgArr[0]).css({
+                    width:WIDTH+"px",
+                    height:HEIGHT+"px"
+                }).appendTo(imgCon);
+                for(var i=0;i<imgArr.length;i++){
+                    var li=$("<li></li>");
+                    li[0].n=i;
+                    li.appendTo(uls).css({
+                        height: "60px",
+                        display:"block",
+                        borderRadius:" 6px",
+                        border:"none",
+                        marginLeft:"10px",
+                        float:"left"
+                    }).on("click",liClickHandler);
+                    var imgIcon=$("<img>").appendTo(li).attr("src",imgArr1[i]).css({
+                        width:"120px",
+                        height: "60px"
+                    });
+                }
+                console.log(imgIcon[0]);
+                con.on("mouseenter",mouseEnterHandler);
+                con.on("mouseleave",mouseLeaveHandler);
+
+                uls.css({
+                    listStyle:"none",
+                    bottom:"10px",
+                    position:"absolute"
+                });
+                uls.css("left",(WIDTH-uls.width())/2+"px");
+                changeLi();
+            }
+
+            function imgLeftMove() {
+                position++;
+                if(position>imgArr.length-1){
+                    position=0;
+                }
+                dic="left";
+                createImg();
+                bool=true;
+                changeLi();
+            }
+
+            function createImg() {
+                imgCon.width(WIDTH*2);
+                var img=$("<img>");
+                img.attr("src",imgArr[position]);
+                if(dic==="left"){
+                    imgCon.append(img);
+                    imgCon.css("left","0px");
+                }else if(dic==="right"){
+                    imgCon.prepend(img);
+                    imgCon.css("left",-WIDTH+"px");
+                }
+                img.css({
+                    width:WIDTH+"px",
+                    height:HEIGHT+"px"
+                })
+            }
+
+            function changeLi() {
+                if(preLi){
+                    preLi.css("border","none")
+                }
+                $("li").eq(position).css("border","2px solid #ffffff");
+                preLi=uls.find("li").eq(position);
+            }
+
+            function leftClickHandler(e) {
+                if(bool) return;
+                position--;
+                if(position<0){
+                    position=imgArr.length-1;
+                }
+                dic="right";
+                createImg();
+                bool=true;
+                changeLi();
+            }
+
+            function rightClickHandler(e) {
+                if(bool) return;
+                imgLeftMove();
+            }
+
+            function liClickHandler(e) {
+                if(bool) return;
+                if(this.n<position){
+                    dic="right";
+                }else if(this.n>position){
+                    dic="left";
+                }else{
+                    return;
+                }
+                position=this.n;
+                createImg();
+                bool=true;
+                changeLi();
+            }
+
+            function mouseEnterHandler(e) {
+                auto=false;
+            }
+
+            function mouseLeaveHandler(e) {
+                auto=true;
+            }
+
+            function animation() {
+                if(auto){
+                    time--;
+                    if(time<=0){
+                        imgLeftMove();
+                        time=250;
+                    }
+                }else{
+                    time=250;
+                }
+                if(!bool) return;
+                if(dic==="left"){
+                    imgCon.css("left",imgCon.position().left-20+"px");
+                    if(imgCon.position().left<=-WIDTH){
+                        imgCon.find("img:first-child").remove();
+                        imgCon.css("left","0px");
+                        bool=false;
+                    }
+                }else if(dic==="right"){
+                    imgCon.css("left",imgCon.position().left+20+"px");
+                    if(imgCon.position().left>=0){
+                        imgCon.find("img:last-child").remove();
+                        imgCon.css("left","0px");
+                        bool=false;
+                    }
+                }
+            }
+
+
+        </script>
+</body>
+</html>
